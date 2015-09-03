@@ -21,6 +21,7 @@ releasedocmaker
 * [Multiple Versions](#Multiple_Versions)
 * [Unreleased Dates](#Unreleased_Dates)
 * [Lint Mode](#Lint_Mode)
+* [Index Mode](#Index_Mode)
 
 # Purpose
 
@@ -113,3 +114,11 @@ $ releasedocmaker.py --project HBASE --version 1.0.0 --lint
 ```
 
 This will do the normal JIRA querying, looking for items it considers problematic.  It will print the information to the screen and then exit with either success or failure, depending upon if any issues were discovered.
+
+# Index Mode
+
+There is basic support for an autoindexer.  It will create two files that contain links to all directories that have a semantic verisoning number (i.e., [0-9].[0-9].[0-9])
+
+  * index.md: a file suitable for conversion to HTML via mvn site
+  * README.md: a file suitable for display on Github and other Markdown rendering websites
+

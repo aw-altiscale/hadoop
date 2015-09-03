@@ -112,6 +112,18 @@ def buildindex(title, asf_license):
                     % (k, version, k.upper().replace(" ", ""), version))
     indexfile.close()
 
+def buildreadme(title, asf_license):
+    versions = reversed(sorted(glob("[0-9]*.[0-9]*.[0-9]*")))
+    with open("README.md", "w") as indexfile:
+        if asf_license is True:
+            indexfile.write(ASF_LICENSE)
+        for version in versions:
+            indexfile.write("* %s v%s\n" % (title, version))
+            for k in ("Changes", "Release Notes"):
+                indexfile.write("    * [%s](%s/%s.%s.md)\n" \
+                    % (k, version, k.upper().replace(" ", ""), version))
+    indexfile.close()
+
 class GetVersions(object):
     """ yo """
     def __init__(self, versions, projects):
@@ -575,6 +587,7 @@ def main():
 
     if options.index:
         buildindex(title, options.license)
+        buildreadme(title, options.license)
 
     if haderrors is True:
         sys.exit(1)
