@@ -253,7 +253,9 @@ function findbugs_postinstall
   local branchxml
   local patchxml
   local newbugsbase
+  local fixedbugsbase
   local new_findbugs_warnings
+  local fixed_findbugs_warnings
   local line
   local firstpart
   local secondpart
@@ -305,6 +307,7 @@ function findbugs_postinstall
     fi
 
     newbugsbase="${PATCH_DIR}/new-findbugs-${fn}"
+    fixedbugsbase="${PATCH_DIR}/fixed-findbugs-${fn}"
 
     "${FINDBUGS_HOME}/bin/computeBugHistory" -useAnalysisTimes -withMessages \
             -output "${combined_xml}" \
@@ -336,8 +339,8 @@ function findbugs_postinstall
     fi
 
     #shellcheck disable=SC2016
-    new_findbugs_fixed_warnings=$("${FINDBUGS_HOME}/bin/filterBugs" -fixed patch \
-        "${combined_xml}" "${newbugsbase}.xml" | ${AWK} '{print $1}')
+    fixed_findbugs_warnings=$("${FINDBUGS_HOME}/bin/filterBugs" -fixed patch \
+        "${combined_xml}" "${fixedbugsbase}.xml" | ${AWK} '{print $1}')
     if [[ $? != 0 ]]; then
       popd >/dev/null
       module_status ${i} -1 "" "${module} cannot run filterBugs (#2) from findbugs"
@@ -348,9 +351,7 @@ function findbugs_postinstall
       continue
     fi
 
-    echo "Found ${new_findbugs_warnings} new Findbugs warnings and ${new_findbugs_fixed_warnings} newly fixed warnings."
-    findbugs_warnings=$((findbugs_warnings+new_findbugs_warnings))
-    findbugs_fixed_warnings=$((findbugs_fixed_warnings+new_findbugs_fixed_warnings))
+    echo "Found ${new_findbugs_warnings} new Findbugs warnings and ${fixed_findbugs_warnings} newly fixed warnings."
 
     "${FINDBUGS_HOME}/bin/convertXmlToText" -html "${newbugsbase}.xml" \
         "${newbugsbase}.html"
