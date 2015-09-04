@@ -19,6 +19,7 @@
 from glob import glob
 from optparse import OptionParser
 from time import gmtime, strftime
+from distutils.version import LooseVersion
 import os
 import re
 import sys
@@ -101,7 +102,8 @@ def mstr(obj):
     return unicode(obj)
 
 def buildindex(title, asf_license):
-    versions = reversed(sorted(glob("[0-9]*.[0-9]*.[0-9]*")))
+    versions = glob("[0-9]*.[0-9]*.[0-9]*")
+    versions.sort(key=LooseVersion,reverse=True)
     with open("index.md", "w") as indexfile:
         if asf_license is True:
             indexfile.write(ASF_LICENSE)
@@ -113,7 +115,8 @@ def buildindex(title, asf_license):
     indexfile.close()
 
 def buildreadme(title, asf_license):
-    versions = reversed(sorted(glob("[0-9]*.[0-9]*.[0-9]*")))
+    versions = glob("[0-9]*.[0-9]*.[0-9]*")
+    versions.sort(key=LooseVersion,reverse=True)
     with open("README.md", "w") as indexfile:
         if asf_license is True:
             indexfile.write(ASF_LICENSE)
@@ -130,7 +133,7 @@ class GetVersions(object):
         versions = versions
         projects = projects
         self.newversions = []
-        versions.sort()
+        versions.sort(key=LooseVersion)
         print "Looking for %s through %s"%(versions[0], versions[-1])
         for project in projects:
             url = "https://issues.apache.org/jira/rest/api/2/project/%s/versions" % project
