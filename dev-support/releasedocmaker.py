@@ -108,7 +108,7 @@ def buildindex(title, asf_license):
         for version in versions:
             indexfile.write("* %s v%s\n" % (title, version))
             for k in ("Changes", "Release Notes"):
-                indexfile.write("    * %s (%s/%s.%s.html)\n" \
+                indexfile.write("    * [%s](%s/%s.%s.html)\n" \
                     % (k, version, k.upper().replace(" ", ""), version))
     indexfile.close()
 
