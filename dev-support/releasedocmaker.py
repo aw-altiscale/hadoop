@@ -102,8 +102,9 @@ def mstr(obj):
     return unicode(obj)
 
 def buildindex(title, asf_license):
+    """Write an index file for later conversion using mvn site"""
     versions = glob("[0-9]*.[0-9]*.[0-9]*")
-    versions.sort(key=LooseVersion,reverse=True)
+    versions.sort(key=LooseVersion, reverse=True)
     with open("index.md", "w") as indexfile:
         if asf_license is True:
             indexfile.write(ASF_LICENSE)
@@ -112,11 +113,11 @@ def buildindex(title, asf_license):
             for k in ("Changes", "Release Notes"):
                 indexfile.write("    * [%s](%s/%s.%s.html)\n" \
                     % (k, version, k.upper().replace(" ", ""), version))
-    indexfile.close()
 
 def buildreadme(title, asf_license):
+    """Write an index file for Github using README.md"""
     versions = glob("[0-9]*.[0-9]*.[0-9]*")
-    versions.sort(key=LooseVersion,reverse=True)
+    versions.sort(key=LooseVersion, reverse=True)
     with open("README.md", "w") as indexfile:
         if asf_license is True:
             indexfile.write(ASF_LICENSE)
@@ -125,10 +126,9 @@ def buildreadme(title, asf_license):
             for k in ("Changes", "Release Notes"):
                 indexfile.write("    * [%s](%s/%s.%s.md)\n" \
                     % (k, version, k.upper().replace(" ", ""), version))
-    indexfile.close()
 
 class GetVersions(object):
-    """ yo """
+    """ List of version strings """
     def __init__(self, versions, projects):
         versions = versions
         projects = projects
