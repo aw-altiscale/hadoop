@@ -19,6 +19,7 @@
 from glob import glob
 from optparse import OptionParser
 from time import gmtime, strftime
+from distutils.version import LooseVersion
 import os
 import re
 import sys
@@ -31,6 +32,7 @@ except ImportError:
 
 RELEASE_VERSION = {}
 NAME_PATTERN = re.compile(r' \([0-9]+\)')
+RELNOTE_PATTERN = re.compile('^\<\!\-\- ([a-z]+) \-\-\>')
 
 ASF_LICENSE = '''
 <!---
@@ -88,6 +90,17 @@ def notableclean(_str):
     _str = _str.rstrip()
     return _str
 
+# if release notes have a special marker,
+# we'll treat them as already in markdown format
+def processrelnote(_str):
+  fmt = RELNOTE_PATTERN.match(_str)
+  if fmt is None:
+      return notableclean(_str)
+  else:
+      return {
+        'markdown' : tableclean(_str),
+      }.get(fmt.group(1),notableclean(_str))
+
 # clean output dir
 def clean_output_dir(directory):
     files = os.listdir(directory)
@@ -101,24 +114,38 @@ def mstr(obj):
     return unicode(obj)
 
 def buildindex(title, asf_license):
-    versions = reversed(sorted(glob("[0-9]*.[0-9]*.[0-9]*")))
+    """Write an index file for later conversion using mvn site"""
+    versions = glob("[0-9]*.[0-9]*.[0-9]*")
+    versions.sort(key=LooseVersion, reverse=True)
     with open("index.md", "w") as indexfile:
         if asf_license is True:
             indexfile.write(ASF_LICENSE)
         for version in versions:
             indexfile.write("* %s v%s\n" % (title, version))
             for k in ("Changes", "Release Notes"):
-                indexfile.write("    * %s (%s/%s.%s.html)\n" \
+                indexfile.write("    * [%s](%s/%s.%s.html)\n" \
                     % (k, version, k.upper().replace(" ", ""), version))
-    indexfile.close()
+
+def buildreadme(title, asf_license):
+    """Write an index file for Github using README.md"""
+    versions = glob("[0-9]*.[0-9]*.[0-9]*")
+    versions.sort(key=LooseVersion, reverse=True)
+    with open("README.md", "w") as indexfile:
+        if asf_license is True:
+            indexfile.write(ASF_LICENSE)
+        for version in versions:
+            indexfile.write("* %s v%s\n" % (title, version))
+            for k in ("Changes", "Release Notes"):
+                indexfile.write("    * [%s](%s/%s.%s.md)\n" \
+                    % (k, version, k.upper().replace(" ", ""), version))
 
 class GetVersions(object):
-    """ yo """
+    """ List of version strings """
     def __init__(self, versions, projects):
         versions = versions
         projects = projects
         self.newversions = []
-        versions.sort()
+        versions.sort(key=LooseVersion)
         print "Looking for %s through %s"%(versions[0], versions[-1])
         for project in projects:
             url = "https://issues.apache.org/jira/rest/api/2/project/%s/versions" % project
@@ -519,7 +546,7 @@ def main():
             if len(jira.get_release_note()) > 0:
                 reloutputs.write_key_raw(jira.get_project(), "\n---\n\n")
                 reloutputs.write_key_raw(jira.get_project(), line)
-                line = '\n%s\n\n' % (tableclean(jira.get_release_note()))
+                line = '\n%s\n\n' % (processrelnote(jira.get_release_note()))
                 reloutputs.write_key_raw(jira.get_project(), line)
 
         if options.lint is True:
@@ -575,6 +602,7 @@ def main():
 
     if options.index:
         buildindex(title, options.license)
+        buildreadme(title, options.license)
 
     if haderrors is True:
         sys.exit(1)

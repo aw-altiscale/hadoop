@@ -21,6 +21,7 @@ releasedocmaker
 * [Multiple Versions](#Multiple_Versions)
 * [Unreleased Dates](#Unreleased_Dates)
 * [Lint Mode](#Lint_Mode)
+* [Index Mode](#Index_Mode)
 
 # Purpose
 
@@ -61,6 +62,12 @@ $ releasedocmaker.py --project HBASE --version 1.2.0
 
 ... will create a 1.2.0 directory and inside that directory will be CHANGES.1.2.0.md and RELEASENOTES.1.2.0.md .
 
+By default, release notes are expected to be in plain text.  However, you can write them in markdown if you include a header at the top of your release note:
+
+```xml
+<!-- markdown -->
+remaining text
+```
 
 # Changing the Header
 
@@ -113,3 +120,11 @@ $ releasedocmaker.py --project HBASE --version 1.0.0 --lint
 ```
 
 This will do the normal JIRA querying, looking for items it considers problematic.  It will print the information to the screen and then exit with either success or failure, depending upon if any issues were discovered.
+
+# Index Mode
+
+There is basic support for an autoindexer.  It will create two files that contain links to all directories that have a major.minor.micro-style version numbering system, where all fields are numeric.
+
+  * index.md: a file suitable for conversion to HTML via mvn site
+  * README.md: a file suitable for display on Github and other Markdown rendering websites
+
