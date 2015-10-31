@@ -21,7 +21,25 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../../hadoop-common-project/hadoop-common)
 include(HadoopCommon)
 
-find_package(OpenSSL REQUIRED)
+# Find the no-suffix version of libcrypto/openssl. See HADOOP-11216 for details.
+set(STORED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+hadoop_set_find_shared_library_without_version()
+set(OPENSSL_NAME "crypto")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    SET(OPENSSL_NAME "eay32")
+endif()
+message("CUSTOM_OPENSSL_PREFIX = ${CUSTOM_OPENSSL_PREFIX}")
+find_library(OPENSSL_LIBRARY
+    NAMES ${OPENSSL_NAME}
+    PATHS ${CUSTOM_OPENSSL_PREFIX} ${CUSTOM_OPENSSL_PREFIX}/lib
+          ${CUSTOM_OPENSSL_PREFIX}/lib64 ${CUSTOM_OPENSSL_LIB} NO_DEFAULT_PATH)
+find_library(OPENSSL_LIBRARY NAMES ${OPENSSL_NAME})
+find_path(OPENSSL_INCLUDE_DIR
+    NAMES openssl/hmac.h
+    PATHS ${CUSTOM_OPENSSL_PREFIX} ${CUSTOM_OPENSSL_PREFIX}/include
+          ${CUSTOM_OPENSSL_INCLUDE} NO_DEFAULT_PATH)
+find_path(OPENSSL_INCLUDE_DIR NAMES openssl/hmac.h)
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${STORED_CMAKE_FIND_LIBRARY_SUFFIXES})
 
 include_directories(
     main/native/utils/api
@@ -71,7 +89,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
 endif()
 
 target_link_libraries(hadooppipes
-    ${OPENSSL_LIBRARIES}
+    ${OPENSSL_LIBRARY}
     ${LIB_DL}
     ${LIB_NET}
 )
