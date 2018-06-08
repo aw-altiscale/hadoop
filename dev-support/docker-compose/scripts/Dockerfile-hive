@@ -12,7 +12,7 @@ ENV HIVE_HOME=/opt/hive/packaging/target/apache-hive-2.1.1-bin/apache-hive-2.1.1
 ENV PATH=$PATH:$HIVE_HOME/bin
 RUN ln -s /usr/share/java/mysql-connector-java-5.1.42.jar $HIVE_HOME/lib/mysql-connector-java.jar
 
-COPY dev-support/docker-compose/scripts/start-hive.sh /root/start-hive.sh
+COPY scripts/start-hive.sh /root/start-hive.sh
 
 USER root
 WORKDIR /root

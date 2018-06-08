@@ -1,6 +1,11 @@
 FROM hadoop:2.7.4
 
-COPY dev-support/docker-compose/scripts/start-namenode.sh /root/start-namenode.sh
+COPY scripts/start-namenode.sh /root/start-namenode.sh
+
+RUN find / -name 'container-executor'
+
+RUN chown root /opt/hadoop/bin/container-executor
+RUN chmod 6050 /opt/hadoop/bin/container-executor
 
 USER root
 WORKDIR /root

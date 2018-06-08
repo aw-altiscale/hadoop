@@ -1,39 +1,58 @@
 FROM hadoop-hive:2.7.4
 
+ARG HADOOP_VERSION
+ARG HADOOP_MINOR_VERSION
+
+RUN wget -O /tmp/mvn339.tgz \
+    'https://www.apache.org/dyn/closer.cgi?filename=maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz&action=download' && \
+    tar -C /opt -xpzf /tmp/mvn339.tgz
+
+ENV MAVEN_HOME=/opt/apache-maven-3.3.9
+ENV PATH=${MAVEN_HOME}/bin:${PATH}
+
 RUN cd /opt && \
     git clone https://github.com/altiscale/spark
 
 ENV MAVEN_OPTS="-Xmx2g -XX:ReservedCodeCacheSize=1024m"
 RUN cd /opt/spark && \
-    mvn -Pyarn -Phadoop-2.7 -Dhadoop.version=2.7.4 -Phive -Phive-thriftserver -DskipTests clean package
+    mvn -Pyarn -Phadoop-$HADOOP_MINOR_VERSION -Dhadoop.version=$HADOOP_VERSION -Phive -Phive-thriftserver -DskipTests clean package
 
 ENV SPARK_HOME=/opt/spark
 RUN cd /root && \
     curl -O https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh
 RUN bash Anaconda3-5.0.1-Linux-x86_64.sh -b -p /opt/anaconda
-ENV PATH="$PATH:/opt/anaconda/bin"
-RUN python3 -m pip install jupyter
+ENV PATH="/opt/anaconda/bin:${PATH}"
+RUN apt-get -q update && apt-get -q install -y python3-pip python3-setuptools
+
+# pip 10.0.x has issues or there are bugs with the python modules involved or
+# something, at least on python 3.4.  but 9.0.3 does work, so force it.
+RUN pip install --upgrade pip==9.0.3
+RUN pip install --upgrade setuptools
+RUN pip install jupyter
 
 # install go juptyer kernal
-RUN apt-get install -y libkrb5-dev libzmq3-dev golang-1.8
+RUN add-apt-repository -y ppa:gophers/archive && apt-get update
+RUN apt-get install -y libkrb5-dev libzmq3-dev golang-1.9
 RUN conda install requests-kerberos -y
-ENV PATH=$PATH:/usr/lib/go-1.8/bin:/root/go/bin
+ENV PATH=$PATH:/usr/lib/go-1.9/bin:/root/go/bin
 ENV GOPATH=/root/go
 RUN go get github.com/yunabe/lgo/cmd/lgo && \
     go get -d github.com/yunabe/lgo/cmd/lgo-internal
 ENV LGOPATH=/root/go/src/github.com/yunabe/lgo
-RUN lgo install && \
-    python3 /root/go/src/github.com/yunabe/lgo/bin/install_kernel && \
-    pip install sparkmagic && \
-    jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
+RUN lgo install
+RUN ls /opt/anaconda/bin
+RUN python3 /root/go/src/github.com/yunabe/lgo/bin/install_kernel
+RUN pip install sparkmagic
+RUN pip show sparkmagic
+RUN jupyter nbextension enable --py --sys-prefix widgetsnbextension && \
     jupyter-kernelspec install /opt/anaconda/lib/python3.6/site-packages/sparkmagic/kernels/sparkkernel && \
     jupyter-kernelspec install /opt/anaconda/lib/python3.6/site-packages/sparkmagic/kernels/pysparkkernel && \
     jupyter-kernelspec install /opt/anaconda/lib/python3.6/site-packages/sparkmagic/kernels/pyspark3kernel && \
     jupyter-kernelspec install /opt/anaconda/lib/python3.6/site-packages/sparkmagic/kernels/sparkrkernel
-COPY dev-support/docker-compose/files/config.json /root/.sparkmagic/config.json
+COPY files/config.json /root/.sparkmagic/config.json
 RUN jupyter serverextension enable --py sparkmagic
 
-COPY dev-support/docker-compose/scripts/start-spark.sh /root/start-spark.sh
+COPY scripts/start-spark.sh /root/start-spark.sh
 
 WORKDIR /root
 CMD "/root/start-spark.sh"

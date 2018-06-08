@@ -1,6 +1,6 @@
 FROM hadoop:2.7.4
 
-COPY dev-support/docker-compose/scripts/start-resourcemanager.sh /root/start-resourcemanager.sh
+COPY scripts/start-resourcemanager.sh /root/start-resourcemanager.sh
 
 USER root
 WORKDIR /root

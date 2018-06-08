@@ -1,5 +1,5 @@
 kdc:
-  image: hadoop-krb:2.7.4
+  image: hadoop-krb:${HADOOP_VERSION}
   hostname: kdc
   container_name: kdc
   domainname: hadoop
@@ -9,7 +9,7 @@ kdc:
     - ${HADOOP_COMPOSE_DIR}/kerberos/logs:/var/log/kerberos
 
 namenode:
-  image: hadoop-nn:2.7.4
+  image: hadoop-nn:${HADOOP_VERSION}
   hostname: namenode
   container_name: namenode
   domainname: hadoop
@@ -27,7 +27,7 @@ namenode:
     - FORMAT_NAMENODE=${FORMAT_NAMENODE}
 
 datanode1:
-  image: hadoop-dn:2.7.4
+  image: hadoop-dn:${HADOOP_VERSION}
   hostname: datanode1
   container_name: datanode1
   domainname: hadoop
@@ -41,7 +41,7 @@ datanode1:
     - "50010:50010"
 
 datanode2:
-  image: hadoop-dn:2.7.4
+  image: hadoop-dn:${HADOOP_VERSION}
   hostname: datanode2
   container_name: datanode2
   net: hadoop
@@ -54,7 +54,7 @@ datanode2:
     - "50011:50010"
 
 datanode3:
-  image: hadoop-dn:2.7.4
+  image: hadoop-dn:${HADOOP_VERSION}
   hostname: datanode3
   container_name: datanode3
   domainname: hadoop
@@ -68,7 +68,7 @@ datanode3:
     - "50012:50010"
 
 httpfs1:
-  image: hadoop-httpfs:2.7.4
+  image: hadoop-httpfs:${HADOOP_VERSION}
   hostname: httpfs1
   container_name: httpfs1
   ports:
@@ -81,14 +81,14 @@ httpfs1:
     - ${HADOOP_COMPOSE_DIR}/kerberos/krb5kdc:/var/lib/krb5kdc
 
 resourcemanager:
-  image: hadoop-rm:2.7.4
+  image: hadoop-rm:${HADOOP_VERSION}
   hostname: resourcemanager
   container_name: resourcemanager
   domainname: hadoop
   net: hadoop
   volumes:
     - ${HADOOP_COMPOSE_DIR}/config:/etc/hadoop
-    - ${HADOOP_COMPOSE_DIR}/logs:/opt/hadoop/hadoop-dist/target/hadoop-2.7.4/logs
+    - ${HADOOP_COMPOSE_DIR}/logs:/opt/hadoop/logs
     - ${HADOOP_COMPOSE_DIR}/kerberos/krb5kdc:/var/lib/krb5kdc
   ports:
     - "8030:8030"
@@ -99,33 +99,33 @@ resourcemanager:
     - "8090:8090"
 
 nodemanager1:
-  image: hadoop-nm:2.7.4
+  image: hadoop-nm:${HADOOP_VERSION}
   hostname: nodemanager1
   container_name: nodemanager1
   domainname: hadoop
   net: hadoop
   volumes:
     - ${HADOOP_COMPOSE_DIR}/config:/etc/hadoop
-    - ${HADOOP_COMPOSE_DIR}/logs:/opt/hadoop/hadoop-dist/target/hadoop-2.7.4/logs
+    - ${HADOOP_COMPOSE_DIR}/logs:/opt/hadoop/logs
     - ${HADOOP_COMPOSE_DIR}/kerberos/krb5kdc:/var/lib/krb5kdc
   ports:
     - "8042:8042"
 
 nodemanager2:
-  image: hadoop-nm:2.7.4
+  image: hadoop-nm:${HADOOP_VERSION}
   hostname: nodemanager2
   container_name: nodemanager2
   domainname: hadoop
   net: hadoop
   volumes:
     - ${HADOOP_COMPOSE_DIR}/config:/etc/hadoop
-    - ${HADOOP_COMPOSE_DIR}/logs:/opt/hadoop/hadoop-dist/target/hadoop-2.7.4/logs
+    - ${HADOOP_COMPOSE_DIR}/logs:/opt/hadoop/logs
     - ${HADOOP_COMPOSE_DIR}/kerberos/krb5kdc:/var/lib/krb5kdc
   ports:
     - "8043:8042"
 
 hive:
-  image: hadoop-hive:2.7.4
+  image: hadoop-hive:${HADOOP_VERSION}
   hostname: hive
   container_name: hive
   domainname: hadoop
@@ -136,7 +136,7 @@ hive:
     - ${HADOOP_COMPOSE_DIR}/kerberos/krb5kdc:/var/lib/krb5kdc
 
 spark:
-  image: hadoop-spark:2.7.4
+  image: hadoop-spark:${HADOOP_VERSION}
   hostname: spark
   container_name: spark
   domainname: hadoop
